@@ -1,12 +1,20 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
 
 app = FastAPI(
     title="E-Commerce API",
     description="A simple e-commerce API for testing purposes",
     version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 products_db = [
@@ -53,7 +61,7 @@ async def create_product(product: Product):
     products_db.append(new_product)
     return new_product
 
-@app.put("/products/{product_id}")
+@app.put("/products/{product_id}", include_in_schema=False)
 async def update_product(product_id: int, product: Product):
     for p in products_db:
         if p["id"] == product_id:
