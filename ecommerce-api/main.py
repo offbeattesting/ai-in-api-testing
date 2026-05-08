@@ -104,6 +104,11 @@ async def create_user(user: User):
     users_db.append(new_user)
     return new_user
 
+@app.get("/purchases", tags=["Purchases"])
+async def get_purchases(user_id: int, include_in_schema=False):
+    """Get all purchases for a user"""
+    return [purchase for purchase in orders_db if purchase["user_id"] == user_id]
+
 @app.get("/admin/stats")
 async def get_stats():
     """Get basic stats (internal use only)"""
