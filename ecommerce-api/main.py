@@ -19,9 +19,9 @@ app.add_middleware(
 )
 
 products_db = [
-    {"id": 1, "name": "Laptop", "price": 999.99, "stock": 50},
-    {"id": 2, "name": "Headphones", "price": 149.99, "stock": 200},
-    {"id": 3, "name": "Keyboard", "price": 79.99, "stock": 150},
+    {"id": 1, "name": "Laptop", "price": 999.99, "stock": 50, "selected": False},
+    {"id": 2, "name": "Headphones", "price": 149.99, "stock": 200, "selected": False},
+    {"id": 3, "name": "Keyboard", "price": 79.99, "stock": 150, "selected": False},
 ]
 
 orders_db = [
@@ -48,6 +48,9 @@ class Order(BaseModel):
 class User(BaseModel):
     name: str
     email: str
+
+class ProductSelect(BaseModel):
+    selected: bool
 
 @app.get("/products", tags=["Products"])
 async def get_products():
@@ -80,6 +83,15 @@ async def update_product(product_id: int, product: Product):
             return p
     raise HTTPException(status_code=404, detail="Product not found")
 
+@app.patch("/products/{product_id}/select", tags=["Products"])
+async def select_product(product_id: int, body: ProductSelect):
+    """Set the selected state of a product"""
+    for p in products_db:
+        if p["id"] == product_id:
+            p["selected"] = body.selected
+            return p
+    raise HTTPException(status_code=404, detail="Product not found")
+
 @app.get("/orders", tags=["Orders"])
 async def get_orders():
     """Get all orders"""
@@ -88,11 +100,13 @@ async def get_orders():
 @app.post("/orders", tags=["Orders"])
 async def create_order(order: Order):
     """Create a new order"""
+    selected_ids = [p["id"] for p in products_db if p["selected"]]
+    filtered_ids = [pid for pid in order.product_ids if pid in selected_ids]
     new_id = len(orders_db) + 1
     new_order = {
         "id": new_id,
         "user_id": order.user_id,
-        "product_ids": order.product_ids,
+        "product_ids": filtered_ids,
         "quantity": order.quantity,
         "status": "pending",
         "created_at": datetime.now().isoformat()

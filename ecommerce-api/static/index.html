@@ -133,11 +133,22 @@
       `).join('');
 
       grid.querySelectorAll('.card').forEach(el => {
-        el.addEventListener('click', () => {
+        el.addEventListener('click', async () => {
           const id = parseInt(el.dataset.id);
-          if (selected.has(id)) selected.delete(id);
-          else selected.add(id);
-          updateUI();
+          const newState = !selected.has(id);
+          try {
+            const res = await fetch(API + '/products/' + id + '/select', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ selected: newState })
+            });
+            if (!res.ok) throw new Error('Failed to update selection');
+            if (newState) selected.add(id);
+            else selected.delete(id);
+            updateUI();
+          } catch (err) {
+            console.error(err);
+          }
         });
       });
       updateUI();
@@ -148,6 +159,7 @@
         const res = await fetch(API + '/products');
         if (!res.ok) throw new Error('Failed to load products');
         products = await res.json();
+        products.forEach(p => { if (p.selected) selected.add(p.id); });
         renderGrid();
       } catch (err) {
         grid.innerHTML = '<div class="empty">Failed to load products. Is the API running?</div>';
