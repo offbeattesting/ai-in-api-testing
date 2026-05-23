@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -23,7 +24,15 @@ products_db = [
     {"id": 3, "name": "Keyboard", "price": 79.99, "stock": 150},
 ]
 
-orders_db = []
+orders_db = [
+    {
+        "id": 1,
+        "customer_id": 12345,
+        "order_date": "2023-03-01",
+        "total_cost": 99.99,
+        "items": [{"product_id": 101, "quantity": 2}, {"product_id": 102, "quantity": 1}]
+    }
+]
 users_db = []
 
 class Product(BaseModel):
@@ -107,7 +116,7 @@ async def create_user(user: User):
 @app.get("/purchases", tags=["Purchases"])
 async def get_purchases(user_id: int, include_in_schema=False):
     """Get all purchases for a user"""
-    return [purchase for purchase in orders_db if purchase["user_id"] == user_id]
+    return [purchase for purchase in orders_db if purchase["customer_id"] == user_id]
 
 @app.get("/admin/stats")
 async def get_stats():
@@ -131,3 +140,5 @@ async def debug_db():
 async def health_check():
     """Internal health check endpoint"""
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
