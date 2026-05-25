@@ -98,7 +98,7 @@ async def get_orders():
     return orders_db
 
 @app.post("/orders", tags=["Orders"])
-async def create_order(order: Order):
+def create_order(order: Order):
     """Create a new order"""
     selected_ids = [p["id"] for p in products_db if p["selected"]]
     filtered_ids = [pid for pid in order.product_ids if pid in selected_ids]
