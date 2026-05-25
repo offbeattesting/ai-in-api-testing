@@ -52,6 +52,16 @@ class User(BaseModel):
 class ProductSelect(BaseModel):
     selected: bool
 
+
+def filter_selected_products(
+    product_ids: list[int],
+    products: list[dict],
+) -> list[int]:
+    """Return only product_ids whose product is currently selected."""
+    selected_ids = {p["id"] for p in products if p["selected"]}
+    return [pid for pid in product_ids if pid in selected_ids]
+
+
 @app.get("/products", tags=["Products"])
 async def get_products():
     """Get all available products"""
@@ -100,8 +110,7 @@ async def get_orders():
 @app.post("/orders", tags=["Orders"])
 def create_order(order: Order):
     """Create a new order"""
-    selected_ids = [p["id"] for p in products_db if p["selected"]]
-    filtered_ids = [pid for pid in order.product_ids if pid in selected_ids]
+    filtered_ids = filter_selected_products(order.product_ids, products_db)
     new_id = len(orders_db) + 1
     new_order = {
         "id": new_id,
