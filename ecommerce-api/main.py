@@ -39,6 +39,7 @@ class Product(BaseModel):
     name: str
     price: float
     stock: int = 0
+    selected: bool
 
 class Order(BaseModel):
     user_id: int
