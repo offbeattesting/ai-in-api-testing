@@ -43,7 +43,7 @@ class Product(BaseModel):
 class Order(BaseModel):
     user_id: int
     product_ids: list[int]
-    quantity: int = 1
+    quantities: list[int]
 
 class User(BaseModel):
     name: str
@@ -61,6 +61,13 @@ def filter_selected_products(
     selected_ids = {p["id"] for p in products if p["selected"]}
     return [pid for pid in product_ids if pid in selected_ids]
 
+def get_total_cost(order: Order) -> float:
+    total = 0.0
+    for i, pid in enumerate(order.product_ids):
+        prod = products_db[pid]
+        quantity = order.quantities[i]
+        total +=  prod["price"] * quantity
+    return total
 
 @app.get("/products", tags=["Products"])
 async def get_products():
@@ -114,9 +121,9 @@ def create_order(order: Order):
     new_id = len(orders_db) + 1
     new_order = {
         "id": new_id,
-        "user_id": order.user_id,
+        "customer_id": order.user_id,
+        "total_cost": get_total_cost(order),
         "product_ids": filtered_ids,
-        "quantity": order.quantity,
         "status": "pending",
         "created_at": datetime.now().isoformat()
     }
