@@ -1,76 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop - E-Commerce</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: #f5f5f7;
       color: #1d1d1f;
       padding: 2rem;
     }
-    .container { max-width: 960px; margin: 0 auto; }
-    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem; }
-    .subtitle { color: #6e6e73; margin-bottom: 2rem; }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #6e6e73;
+      margin-bottom: 2rem;
+    }
 
     .toolbar {
-      display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
-      margin-bottom: 1.5rem; padding: 1rem; background: #fff;
-      border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
     }
-    .toolbar label { font-weight: 600; font-size: 0.875rem; }
+
+    .toolbar label {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
     .toolbar input {
-      padding: 0.5rem 0.75rem; border: 1px solid #d2d2d7; border-radius: 8px;
-      font-size: 0.875rem; width: 100px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d2d2d7;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      width: 100px;
     }
-    .toolbar input:focus { outline: none; border-color: #0071e3; }
+
+    .toolbar input:focus {
+      outline: none;
+      border-color: #0071e3;
+    }
 
     .grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1rem; margin-bottom: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
+
     .card {
-      background: #fff; border-radius: 14px; padding: 1.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,.08); cursor: pointer;
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+      cursor: pointer;
       transition: box-shadow .2s, transform .2s, border-color .2s;
-      border: 2px solid transparent; position: relative;
+      border: 2px solid transparent;
+      position: relative;
     }
-    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.12); transform: translateY(-2px); }
-    .card.selected { border-color: #0071e3; background: #f0f7ff; }
+
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+      transform: translateY(-2px);
+    }
+
+    .card.selected {
+      border-color: #0071e3;
+      background: #f0f7ff;
+    }
+
     .card.selected::after {
-      content: "\2713"; position: absolute; top: 0.5rem; right: 0.75rem;
-      font-size: 1.25rem; color: #0071e3; font-weight: 700;
+      content: "\2713";
+      position: absolute;
+      top: 0.5rem;
+      right: 0.75rem;
+      font-size: 1.25rem;
+      color: #0071e3;
+      font-weight: 700;
     }
-    .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-    .card .price { font-size: 1.3rem; font-weight: 700; color: #0071e3; }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card .price {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0071e3;
+    }
+
     .card .stock {
-      font-size: 0.8rem; color: #6e6e73; margin-top: 0.35rem;
+      font-size: 0.8rem;
+      color: #6e6e73;
+      margin-top: 0.35rem;
     }
-    .card .stock.low { color: #d93025; }
+
+    .card .stock.low {
+      color: #d93025;
+    }
 
     .btn {
-      background: #0071e3; color: #fff; border: none; border-radius: 12px;
-      padding: 0.75rem 2rem; font-size: 1rem; font-weight: 600;
-      cursor: pointer; transition: background .2s;
+      background: #0071e3;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
     }
-    .btn:hover { background: #0077ed; }
-    .btn:disabled { background: #b0b0b4; cursor: not-allowed; }
+
+    .btn:hover {
+      background: #0077ed;
+    }
+
+    .btn:disabled {
+      background: #b0b0b4;
+      cursor: not-allowed;
+    }
 
     .toast {
-      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-      background: #1d1d1f; color: #fff; padding: 0.75rem 1.5rem;
-      border-radius: 10px; font-size: 0.9rem; opacity: 0;
-      transition: opacity .3s; pointer-events: none;
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1d1d1f;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
     }
-    .toast.show { opacity: 1; }
 
-    .empty { text-align: center; color: #6e6e73; padding: 3rem; }
-    .error { color: #d93025; font-size: 0.85rem; margin-top: 0.5rem; }
+    .toast.show {
+      opacity: 1;
+    }
+
+    .empty {
+      text-align: center;
+      color: #6e6e73;
+      padding: 3rem;
+    }
+
+    .error {
+      color: #d93025;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Shop</h1>
@@ -182,7 +291,7 @@
         const res = await fetch(API + '/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, product_ids, quantity: 1 })
+          body: JSON.stringify({ user_id: userId, product_ids, quantities: product_ids.map(() => 1) })
         });
         if (!res.ok) throw new Error('Order failed');
         const order = await res.json();
@@ -200,4 +309,5 @@
     loadProducts();
   </script>
 </body>
+
 </html>

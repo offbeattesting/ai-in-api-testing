@@ -1,13 +1,14 @@
+from datetime import datetime
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from datetime import datetime
 
 app = FastAPI(
     title="E-Commerce API",
     description="A simple e-commerce API for testing purposes",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -30,10 +31,11 @@ orders_db = [
         "customer_id": 12345,
         "order_date": "2023-03-01",
         "total_cost": 99.99,
-        "items": [{"product_id": 101, "quantity": 2}, {"product_id": 102, "quantity": 1}]
+        "items": [{"product_id": 101, "quantity": 2}, {"product_id": 102, "quantity": 1}],
     }
 ]
 users_db = []
+
 
 class Product(BaseModel):
     name: str
@@ -41,14 +43,17 @@ class Product(BaseModel):
     stock: int = 0
     selected: bool
 
+
 class Order(BaseModel):
     user_id: int
     product_ids: list[int]
     quantities: list[int]
 
+
 class User(BaseModel):
     name: str
     email: str
+
 
 class ProductSelect(BaseModel):
     selected: bool
@@ -60,20 +65,23 @@ def filter_selected_products(
 ) -> list[int]:
     """Return only product_ids whose product is currently selected."""
     selected_ids = {p["id"] for p in products if p["selected"]}
-    return [pid for pid in product_ids if pid in selected_ids]
+    return [pid for pid in product_ids if pid not in selected_ids]
+
 
 def get_total_cost(order: Order) -> float:
     total = 0.0
     for i, pid in enumerate(order.product_ids):
         prod = products_db[pid]
         quantity = order.quantities[i]
-        total +=  prod["price"] * quantity
+        total += prod["price"] * quantity
     return total
+
 
 @app.get("/products", tags=["Products"])
 async def get_products():
     """Get all available products"""
     return products_db
+
 
 @app.get("/products/{product_id}", tags=["Products"])
 async def get_product(product_id: int):
@@ -83,6 +91,7 @@ async def get_product(product_id: int):
             return product
     raise HTTPException(status_code=404, detail="Product not found")
 
+
 @app.post("/products", tags=["Products"])
 async def create_product(product: Product):
     """Create a new product"""
@@ -90,6 +99,7 @@ async def create_product(product: Product):
     new_product = {"id": new_id, **product.model_dump()}
     products_db.append(new_product)
     return new_product
+
 
 @app.put("/products/{product_id}", include_in_schema=False)
 async def update_product(product_id: int, product: Product):
@@ -101,6 +111,7 @@ async def update_product(product_id: int, product: Product):
             return p
     raise HTTPException(status_code=404, detail="Product not found")
 
+
 @app.patch("/products/{product_id}/select", tags=["Products"])
 async def select_product(product_id: int, body: ProductSelect):
     """Set the selected state of a product"""
@@ -110,10 +121,12 @@ async def select_product(product_id: int, body: ProductSelect):
             return p
     raise HTTPException(status_code=404, detail="Product not found")
 
+
 @app.get("/orders", tags=["Orders"])
 async def get_orders():
     """Get all orders"""
     return orders_db
+
 
 @app.post("/orders", tags=["Orders"])
 def create_order(order: Order):
@@ -126,15 +139,17 @@ def create_order(order: Order):
         "total_cost": get_total_cost(order),
         "product_ids": filtered_ids,
         "status": "pending",
-        "created_at": datetime.now().isoformat()
+        "created_at": datetime.now().isoformat(),
     }
     orders_db.append(new_order)
     return new_order
+
 
 @app.get("/users", tags=["Users"])
 async def get_users():
     """Get all users"""
     return users_db
+
 
 @app.post("/users", tags=["Users"])
 async def create_user(user: User):
@@ -144,10 +159,12 @@ async def create_user(user: User):
     users_db.append(new_user)
     return new_user
 
-@app.get("/purchases", tags=["Purchases"])
-async def get_purchases(user_id: int, include_in_schema=False):
+
+@app.get("/purchases", tags=["Purchases"], include_in_schema=False)
+async def get_purchases(user_id: int):
     """Get all purchases for a user"""
     return [purchase for purchase in orders_db if purchase["customer_id"] == user_id]
+
 
 @app.get("/admin/stats")
 async def get_stats():
@@ -155,21 +172,20 @@ async def get_stats():
     return {
         "total_products": len(products_db),
         "total_orders": len(orders_db),
-        "total_users": len(users_db)
+        "total_users": len(users_db),
     }
+
 
 @app.get("/debug/db")
 async def debug_db():
     """Debug endpoint - exposes full database state"""
-    return {
-        "products": products_db,
-        "orders": orders_db,
-        "users": users_db
-    }
+    return {"products": products_db, "orders": orders_db, "users": users_db}
+
 
 @app.get("/internal/health")
 async def health_check():
     """Internal health check endpoint"""
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

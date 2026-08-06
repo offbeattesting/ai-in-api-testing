@@ -1,13 +1,11 @@
-from pathlib import Path
-
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
 import httpx
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 app = FastAPI()
 
 # ECOMMERCE_API = "https://ecommerce-api.fastapicloud.dev"
-ECOMMERCE_API = "https://d731beab-77ba-42d4-8e9f-f3559a87ea7b.mock.pstmn.io"
+ECOMMERCE_API = "https://de4a2ab1-37e5-4b92-814c-4a82589cd214.mock.pstmn.io"
 
 ORDER_PAGE = """<!DOCTYPE html>
 <html lang="en">
@@ -124,8 +122,9 @@ async def place_order():
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{ECOMMERCE_API}/orders",
-            json={"user_id": 1, "product_ids": [10, 20], "quantity": 1},
+            json={"user_id": 1, "product_ids": [1, 2], "quantities": [1, 2]},
         )
+        print(resp.text)
     if resp.is_success:
         return RedirectResponse(url="/payment", status_code=302)
     return RedirectResponse(url="/?error=Placing+the+order+failed", status_code=302)
